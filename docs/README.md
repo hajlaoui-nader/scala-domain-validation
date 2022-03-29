@@ -13,6 +13,7 @@ on peut écrire aussi :cold_sweat:
 val emptyTicket = Ticket(pnr = "", tcn = "", fareCode = "")
 ```
 donc on peut dire 
+
 ![types are a lie](typesAreALie.jpg)
 
 ### value types à la rescousse
@@ -123,3 +124,5 @@ val tcn = Tcn("")
 
 ```
  📝 Newtypes résout uniquement le problème de zero-cost wrappers, mais ne résout pas le problème de la validation 
+
+ ### let's refine all this
