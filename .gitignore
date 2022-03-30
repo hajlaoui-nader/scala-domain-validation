@@ -29,7 +29,6 @@
 .settings
 .tags
 .tags_sorted_by_file
-.target
 .worksheet
 Makefile
 TAGS
@@ -38,7 +37,6 @@ logs
 project/boot/*
 project/plugins/project
 src_managed
-target
 tm*.lck
 tm*.log
 tm.out
@@ -53,7 +51,7 @@ tq:q
 .bsp
 .envrc
 project/boot
-target
+/target
 .ensime
 .ensime_lucene
 .ensime_cache
@@ -88,3 +86,7 @@ project/project/*
 src/test/scala/*
 .scala/*
 .vscode/*
+/project/target/*
+/onlycats-docs/target/scala-2.13
+/onlycats-docs/target/streams
+!/onlycats-docs/target/mdoc/*
