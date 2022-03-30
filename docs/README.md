@@ -126,3 +126,5 @@ val tcn = Tcn("")
  📝 Newtypes résout uniquement le problème de zero-cost wrappers, mais ne résout pas le problème de la validation 
 
  ### let's refine all this
+ 
+ TODO add refined 
