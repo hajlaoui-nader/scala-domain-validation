@@ -7,6 +7,7 @@ lazy val baseSettings: Seq[Setting[_]] = Seq(
     "co.fs2" %% "fs2-io" % "3.1.3",
     "tf.tofu" %% "derevo-cats" % "0.12.6",
     "io.estatico" %% "newtype" % "0.4.4",
+    "eu.timepit" %% "refined" % "0.9.28",
     "io.circe" %% "circe-core" % "0.13.0",
     "io.circe" %% "circe-generic" % "0.13.0",
     "io.circe" %% "circe-parser" % "0.13.0",

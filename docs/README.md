@@ -2,15 +2,15 @@
 on crée un titre, easy right ?
 
 ```scala mdoc
-case class Ticket(pnr: String, tcn: String, fareCode: String)
+case class TicketS(pnr: String, tcn: String, fareCode: String)
 
-val ticket = Ticket(pnr = "UEMZTN", tcn = "459036690", fareCode = "AE98")
+val ticketS = TicketS(pnr = "UEMZTN", tcn = "459036690", fareCode = "AE98")
 ```
 
 on peut écrire aussi :cold_sweat:
 
 ```scala mdoc
-val emptyTicket = Ticket(pnr = "", tcn = "", fareCode = "")
+val emptyTicket = TicketS(pnr = "", tcn = "", fareCode = "")
 ```
 donc on peut dire 
 
@@ -109,22 +109,188 @@ pour garder un code facile à lire, optimisé, ma recommendation est d'utiliser 
 ```scala mdoc
 import io.estatico.newtype.macros._
 
-@newtype case class Tcn(value: String)
+@newtype case class TcnN(value: String)
 
-@newtype  case class Pnr(value: String)
+@newtype  case class PnrN(value: String)
 
-@newtype case class FareCode(value: String)
+@newtype case class FareCodeN(value: String)
 
 ```
 
 tout a l'air bon, sauf qu'on peut toujours écrire 
 
 ```scala mdoc
-val tcn = Tcn("")
+val tcnN = TcnN("")
 
 ```
  📝 Newtypes résout uniquement le problème de zero-cost wrappers, mais ne résout pas le problème de la validation 
 
  ### let's refine all this
- 
- TODO add refined 
+ La librairie [refined](https://github.com/fthomas/refined) nous permet de valider les données au compile time et au runtime time.
+
+```scala mdoc
+import eu.timepit.refined.types.string._
+import eu.timepit.refined.auto._
+
+@newtype case class TcnRefined(value: NonEmptyString)
+
+val tcnRefined = TcnRefined("123456")
+
+// val emptyTcnRefined = Tcn("") // ceci ne compile pas 🎉
+
+```
+refined semble etre une bonne piste, elle s'intègre parfaitement avec `Circe`, `Scalacheck`, `PureConfig` et beaucoup d'autres librairies de l'ecosystème scala.
+
+#### runtime validation
+le premier exemple a montré la capacité de faire de la validation au compile time et la combinaison avec les newtypes.
+Dans cette partie nous allons explorer la validation au runtime, des données qu'on recoit par exemple d'une requete HTTP ou autre service ou la compile validation n'est pas possible.
+
+Refined propose une fonction générique, qui est définit comme suit:
+```scala
+def refineV[P]: RefinePartiallyApplied[P] = new RefinePartiallyApplied[P]
+
+// Note le P == Predicate
+
+final class RefinePartiallyApplied[P] {
+    def apply[T](t: T)(implicit v: Validate[T, P]): Either[String, Refined[T, P]]
+}
+```
+dans le prochain exemple, supposons que `str` est une runtime value.
+
+```scala mdoc
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined._ 
+import eu.timepit.refined.auto._
+import eu.timepit.refined.api.RefinedTypeOps
+import eu.timepit.refined.numeric.Greater
+
+val str: String = "some runtime value"
+
+val res: Either[String, NonEmptyString] = NonEmptyString.from(str)
+
+val emptyStr: String = ""
+
+val resEmpty: Either[String, NonEmptyString] = NonEmptyString.from(emptyStr)
+
+// on peut faire aussi 
+type GTFive = Int Refined Greater[5] // je définis un nouveau type
+
+object GTFive extends RefinedTypeOps[GTFive, Int] // je définis l'objet et je l'enrichis avec les fonctions de RefinedType
+
+val number: Int = 33
+
+val gtFiveRes: Either[String, GTFive] = GTFive.from(number) // je bénificie de la fonction `from`
+
+```
+
+on remarque que la validation au runtime se fait en utilisant des `Either`, qui est une `Monad`, ec qui veut dire que la validation se fait séquentiellement, ca échoue à la première erreur. L'utilisation de `cats.data.Validated` qui ressemble beaucoup à `Either` sinon le fait que c'est une `Applicative` capable de cumuler les erreurs et valider la data en parallèle.
+Le type qu'on utilise assez souvent `ValidatedNel[E,A]` qui est un alias de `Validated[NonEmptyString[E], A]`
+
+```scala mdoc
+import cats.implicits._
+import cats.data.ValidatedNel
+
+case class MyType(a: NonEmptyString, b: GTFive)
+
+def validate(a: String, b: Int): ValidatedNel[String, MyType] =
+    (   
+        NonEmptyString.from(a).toValidatedNel,
+        GTFive.from(b).toValidatedNel
+    ).mapN(MyType.apply)
+
+
+val expectValidationError = validate("", 3)    
+```
+revenons à notre exemple de `Ticket`
+```scala mdoc
+type PnrR = NonEmptyString
+object PnrR extends RefinedTypeOps[PnrR, String]
+
+type TcnR = NonEmptyString
+object TcnR extends RefinedTypeOps[TcnR, String]
+
+type FareCodeR = NonEmptyString
+object FareCodeR extends RefinedTypeOps[FareCodeR, String]
+
+@newtype case class Tcn(value: TcnR)
+@newtype case class Pnr(value: PnrR)
+@newtype case class FareCode(value: FareCodeR)
+
+case class Ticket(pnr: Pnr, tcn: Tcn, fareCode: FareCode)
+
+def mkTicket(t: String, p: String, fc: String): ValidatedNel[String, Ticket] = 
+    (
+        PnrR.from(p).toValidatedNel.map(Pnr.apply),
+        TcnR.from(t).toValidatedNel.map(Tcn.apply),
+        FareCodeR.from(fc).toValidatedNel.map(FareCode.apply)
+    ).mapN(Ticket.apply)
+
+```
+
+ouf :sweat_smile: ca fait le job mais beaucoup de boilerplate, mais on remarque l'émergence d'un pattern.
+Idéalement on voudrait arriver à écrire
+
+```scala
+def mkTicket(t: String, p: String, fc: String): ValidatedNel[String, Ticket] = 
+    (
+        validate[Pnr](p),
+        validate[Tcn](t),
+        validate[FareCode](fc)
+    ).mapN(Ticket.apply)  
+```
+let's do it
+
+```scala mdoc
+object NewtypeRefinedOps {
+    import io.estatico.newtype.Coercible
+    import io.estatico.newtype.ops._
+    import eu.timepit.refined._
+    import eu.timepit.refined.api._
+    import eu.timepit.refined.auto._
+
+    
+    final class NewtypeRefinedPartiallyApplied[A] {
+        def apply[T, P](raw: T)(implicit c: Coercible[Refined[T, P], A], v: Validate[T, P]): ValidatedNel[String, A] =
+        refineV[P](raw).toValidatedNel.map(_.coerce[A])
+    }
+    
+    def validate[A]: NewtypeRefinedPartiallyApplied[A] =
+        new NewtypeRefinedPartiallyApplied[A]
+
+    implicit class NewtypeOps[T](raw: T) {
+    def as[A]: NewtypePartiallyApplied[A, T] = new NewtypePartiallyApplied[A, T](raw)
+  }
+
+  final class NewtypePartiallyApplied[A, T](raw: T) {
+    def validate[P](implicit
+        c: Coercible[Refined[T, P], A],
+        v: Validate[T, P]
+    ): ValidatedNel[String, A] =
+      refineV[P](raw).toValidatedNel.map(_.coerce[A])
+  }
+
+}
+```
+
+and now ... on peut écrire avec le sourire
+
+
+```scala mdoc
+
+import NewtypeRefinedOps._
+
+def mkTicket2(t: String, p: String, fc: String): ValidatedNel[String, Ticket] = 
+    (
+        p.as[Pnr].validate,
+        t.as[Tcn].validate,
+        fc.as[FareCode].validate
+    ).mapN(Ticket.apply)  
+
+
+val enfinErrorTicket = mkTicket2("pnr", "", "AE93")
+
+val enfinGoodTicket = mkTicket2("UEMZTN", "459036690", "AE98")
+
+```
+
+### Intégration avec circe
