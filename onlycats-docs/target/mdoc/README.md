@@ -336,3 +336,4 @@ donc en fin de compte, les types ARE ALIIIIVE comme dirait Pierre..
 ![types are real](yes.jpg)
 
 ### Intégration avec circe
+on peut facilement intégrer les librairies `newtypes` et `refined` avec `circe` et utiliser le `typeclass derivation` afin de génèrer les decoders/encoders.
