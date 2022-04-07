@@ -292,7 +292,7 @@ val enfinErrorTicket = mkTicket2("pnr", "", "AE93")
 val enfinGoodTicket = mkTicket2("UEMZTN", "459036690", "AE98")
 
 ```
-donc en fin de compte, les types ARE ALIIIIVE comme dirait Pierre.. \
+donc en fin de compte, les types ARE ALIVE, ALIIIIVE.. \
 ![types are real](yes.jpg)
 
 ### Intégration avec circe
