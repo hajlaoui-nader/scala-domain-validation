@@ -203,9 +203,9 @@ val resEmpty: Either[String, NonEmptyString] = NonEmptyString.from(emptyStr)
 // )
 
 // on peut faire aussi 
-type GTFive = Int Refined Greater[5] // je définis un nouveau type // je définis un nouveau type
+type GTFive = Int Refined Greater[5] // je définis un nouveau type
 
-object GTFive extends RefinedTypeOps[GTFive, Int] // je définis l'objet et je l'enrichis avec les fonctions de RefinedType // je définis l'objet et je l'enrichis avec les fonctions de RefinedType
+object GTFive extends RefinedTypeOps[GTFive, Int] // je définis l'objet et je l'enrichis avec les fonctions de RefinedType
 
 val number: Int = 33
 // number: Int = 33
