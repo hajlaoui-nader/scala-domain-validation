@@ -30,4 +30,14 @@ object TheProblem extends App {
       FareCodeR.from(fc).toValidatedNel.map(FareCode.apply)
     ).mapN(Ticket.apply)
 
+  val op: Option[Int] = Option(1).map(_ => 2)
+
+  implicit class StringCyrilleOps(s: String) {
+    def toCyrille: String = "cyrille"
+  }
+
+  val x: String = "".toCyrille
+  println("hello world")
+  println(x)
+
 }

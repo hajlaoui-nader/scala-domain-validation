@@ -270,9 +270,9 @@ Idéalement on voudrait arriver à écrire
 ```scala
 def mkTicket(t: String, p: String, fc: String): ValidatedNel[String, Ticket] = 
     (
-        validate[Pnr](p),
-        validate[Tcn](t),
-        validate[FareCode](fc)
+        p.as[Pnr].validate,
+        t.as[Tcn].validate,
+        fc.as[FareCode].validate
     ).mapN(Ticket.apply)  
 ```
 let's do it
@@ -341,4 +341,5 @@ on peut facilement intégrer les librairies `newtypes` et `refined` avec `circe`
 on peut utiliser la librairie [derevo](https://github.com/tofu-tf/derevo) pour le `typeclass derivation`
 
 exemple
+
  

@@ -25,7 +25,7 @@ object RuntimeValidation extends IOApp.Simple {
   def run: IO[Unit] = p9("", 4)
 
   val p0: IO[Unit] =
-    IO.println(showName("gvolpe@github.com", "12345", "foo"))
+    IO.println(showName("haha@github.com", "12345", "foo"))
 
   // ----------------- Value classes -------------------
   import types._
@@ -36,7 +36,7 @@ object RuntimeValidation extends IOApp.Simple {
       and your email is ${email.value}.
      """
 
-  val badUserName = UserNameV("gvolpe@github.com")
+  val badUserName = UserNameV("haha@github.com")
 
   val p1: IO[Unit] =
     IO.println(
@@ -78,7 +78,7 @@ object RuntimeValidation extends IOApp.Simple {
   val p3: IO[Unit] =
     IO.println(
       showNameT(
-        UserNameT("gvolpe@github.com"),
+        UserNameT("haha@github.com"),
         NameT("12345"),
         EmailT("")
       )
@@ -100,7 +100,7 @@ object RuntimeValidation extends IOApp.Simple {
 
   val p4: IO[Unit] =
     (
-      mkUsername("gvolpe").liftTo[IO](EmptyError),
+      mkUsername("pist").liftTo[IO](EmptyError),
       mkName("George").liftTo[IO](EmptyError),
       mkEmail("123").liftTo[IO](InvalidEmail)
     ).parMapN(showNameT)
