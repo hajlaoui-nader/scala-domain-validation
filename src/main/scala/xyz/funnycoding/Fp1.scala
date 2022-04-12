@@ -6,6 +6,13 @@ object Fp1 {
   case object PNil extends PList[Nothing]
   case class PCons[+A](head: A, tail: PList[A]) extends PList[A]
 
+  trait PSemiGroup[A] {
+    def combine(x: A, y: A): A
+  }
+  trait PMonoid[A] extends PSemiGroup[A] {
+    def empty: A
+  }
+
   trait PFunctor[F[_]] {
     def map[A, B](fa: F[A])(f: A => B): F[B]
   }
