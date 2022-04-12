@@ -15,4 +15,9 @@ object Fp1 {
     def ap[A, B](fa: F[A])(f: F[A => B]): F[B]
   }
 
+  trait PMonad[F[_]] extends PApplicative[F] {
+    def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+    def flatten[A](p: F[F[A]]): F[A] = flatMap(p)(identity)
+  }
+
 }
