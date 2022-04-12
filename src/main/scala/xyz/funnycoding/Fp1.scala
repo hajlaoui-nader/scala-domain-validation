@@ -20,4 +20,9 @@ object Fp1 {
     def flatten[A](p: F[F[A]]): F[A] = flatMap(p)(identity)
   }
 
+  trait PTraversable[F[_]] extends PMonad[F] {
+    def traverse[A, B](fa: F[A])(f: A => F[B]): F[F[B]]
+    def sequence[A](fas: F[F[A]]): F[F[A]] = traverse(fas)(identity)
+  }
+
 }
