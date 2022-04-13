@@ -6,6 +6,13 @@ object Fp1 {
   case object PNil extends PList[Nothing]
   case class PCons[+A](head: A, tail: PList[A]) extends PList[A]
 
+  implicit val plistFunctor = new Functor[PList] {
+    def map[A, B](fa: PList[A])(f: A => B): PList[B] = fa match {
+      case PNil => PNil
+      case PCons(h, t) => PCons(f(h), map(t)(f))
+    }
+  }
+
   trait PSemiGroup[A] {
     def combine(x: A, y: A): A
   }
@@ -31,5 +38,9 @@ object Fp1 {
     def traverse[A, B](fa: F[A])(f: A => F[B]): F[F[B]]
     def sequence[A](fas: F[F[A]]): F[F[A]] = traverse(fas)(identity)
   }
+
+
+
+
 
 }
