@@ -33,7 +33,9 @@ object Fp1 {
     def combine(x: String, y: String): String = s"$x$y"
   }
   
-  
+  implicit val stringPMonoid = new PMonoid[String] {
+    def empty = ""
+  }
   
   trait PMonoid[A] extends PSemiGroup[A] {
     def empty: A
