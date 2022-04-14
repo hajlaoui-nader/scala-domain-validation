@@ -14,6 +14,15 @@ object Fp1 {
       }
   }
 
+  implicit val pOptionApplicative = new PApplicative[Option] {
+    // def map[A, B](fa: Option[A])(f: A => B): Option[B] = ???
+
+    def pure[A](a: A): Option[A] = Some(a)
+
+    def ap[A, B](fa: Option[A])(f: Option[A => B]): Option[B] = ???
+
+  }
+
   sealed trait PList[+A]
   case object PNil extends PList[Nothing]
   case class PCons[+A](head: A, tail: PList[A]) extends PList[A]
@@ -32,11 +41,11 @@ object Fp1 {
   implicit val stringPSemiGroup = new pSemiGroup[String] {
     def combine(x: String, y: String): String = s"$x$y"
   }
-  
+
   implicit val stringPMonoid = new PMonoid[String] {
     def empty = ""
   }
-  
+
   trait PMonoid[A] extends PSemiGroup[A] {
     def empty: A
   }
