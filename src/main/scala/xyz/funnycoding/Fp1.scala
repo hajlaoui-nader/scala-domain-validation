@@ -28,6 +28,13 @@ object Fp1 {
   trait PSemiGroup[A] {
     def combine(x: A, y: A): A
   }
+
+  implicit val stringPSemiGroup = new pSemiGroup[String] {
+    def combine(x: String, y: String): String = s"$x$y"
+  }
+  
+  
+  
   trait PMonoid[A] extends PSemiGroup[A] {
     def empty: A
   }
