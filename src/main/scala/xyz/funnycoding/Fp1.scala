@@ -14,12 +14,12 @@ object Fp1 {
       }
   }
 
-  implicit val pOptionApplicative = new PApplicative[Option] {
-    // def map[A, B](fa: Option[A])(f: A => B): Option[B] = ???
+  implicit val pOptionApplicative = new PApplicative[POption] {
+    def map[A, B](fa: POption[A])(f: A => B): POption[B] = ???
 
-    def pure[A](a: A): Option[A] = Some(a)
+    def pure[A](a: A): POption[A] = PSome(a)
 
-    def ap[A, B](fa: Option[A])(f: Option[A => B]): Option[B] = ???
+    def ap[A, B](fa: POption[A])(f: POption[A => B]): POption[B] = ???
 
   }
 
@@ -38,11 +38,13 @@ object Fp1 {
     def combine(x: A, y: A): A
   }
 
-  implicit val stringPSemiGroup = new pSemiGroup[String] {
+  implicit val stringPSemiGroup = new PSemiGroup[String] {
     def combine(x: String, y: String): String = s"$x$y"
   }
 
   implicit val stringPMonoid = new PMonoid[String] {
+    def combine(x: String, y: String): String = ???
+
     def empty = ""
   }
 
